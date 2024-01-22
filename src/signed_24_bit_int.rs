@@ -3,106 +3,107 @@ use std::ops::{
     SubAssign,
 };
 
-/// A representation of a 24-bit unsigned integer.
+/// A representation of a 24-bit signed integer.
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct u24([u8; 3]);
+pub struct i24([u8; 3]);
 
-impl u24 {
-    pub const MAX: u32 = 1 >> 24;
+impl i24 {
+    pub const MIN: i32 = -(1 << 23);
+    pub const MAX: i32 = 1 << 23;
 
-    /// Creates a new `u24` from a `u32`.
+    /// Creates a new `i24` from a `i32`.
     // this is a false negative from clippy, we can bypass it
     #[allow(clippy::absurd_extreme_comparisons)]
-    pub fn new(value: u32) -> Self {
+    pub fn new(value: i32) -> Self {
         debug_assert!(value <= Self::MAX);
-        Self::from_u32(value)
+        Self::from_i32(value)
     }
 
     /// Converts `self` into a `u32`.
-    pub fn to_u32(self) -> u32 {
+    pub fn to_i32(self) -> i32 {
         let [a, b, c] = self.0;
-        u32::from_le_bytes([a, b, c, 0])
+        i32::from_le_bytes([a, b, c, 0])
     }
 
-    fn from_u32(val: u32) -> Self {
+    fn from_i32(val: i32) -> Self {
         let [a, b, c, _] = val.to_le_bytes();
         Self([a, b, c])
     }
 
-    fn load_from_u32(&mut self, val: u32) {
+    fn load_from_i32(&mut self, val: i32) {
         let [a, b, c, _] = val.to_le_bytes();
         self.0 = [a, b, c];
     }
 }
 
-impl Add for u24 {
+impl Add for i24 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Self::from_u32(self.to_u32() + rhs.to_u32())
+        Self::from_i32(self.to_i32() + rhs.to_i32())
     }
 }
 
-impl AddAssign for u24 {
+impl AddAssign for i24 {
     fn add_assign(&mut self, rhs: Self) {
-        self.load_from_u32(self.to_u32() + rhs.to_u32());
+        self.load_from_i32(self.to_i32() + rhs.to_i32());
     }
 }
 
-impl Sub for u24 {
+impl Sub for i24 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Self::from_u32(self.to_u32() - rhs.to_u32())
+        Self::from_i32(self.to_i32() - rhs.to_i32())
     }
 }
 
-impl SubAssign for u24 {
+impl SubAssign for i24 {
     fn sub_assign(&mut self, rhs: Self) {
-        self.load_from_u32(self.to_u32() - rhs.to_u32());
+        self.load_from_i32(self.to_i32() - rhs.to_i32());
     }
 }
 
-impl Mul for u24 {
+impl Mul for i24 {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Self::from_u32(self.to_u32() * rhs.to_u32())
+        Self::from_i32(self.to_i32() * rhs.to_i32())
     }
 }
 
-impl MulAssign for u24 {
+impl MulAssign for i24 {
     fn mul_assign(&mut self, rhs: Self) {
-        self.load_from_u32(self.to_u32() * rhs.to_u32());
+        self.load_from_i32(self.to_i32() * rhs.to_i32());
     }
 }
 
-impl Div for u24 {
+impl Div for i24 {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        Self::from_u32(self.to_u32() / rhs.to_u32())
+        Self::from_i32(self.to_i32() / rhs.to_i32())
     }
 }
 
-impl DivAssign for u24 {
+impl DivAssign for i24 {
     fn div_assign(&mut self, rhs: Self) {
-        self.load_from_u32(self.to_u32() / rhs.to_u32());
+        self.load_from_i32(self.to_i32() / rhs.to_i32());
     }
 }
 
-impl Rem for u24 {
+impl Rem for i24 {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
-        Self::from_u32(self.to_u32() % rhs.to_u32())
+        Self::from_i32(self.to_i32() % rhs.to_i32())
     }
 }
 
-impl RemAssign for u24 {
+impl RemAssign for i24 {
     fn rem_assign(&mut self, rhs: Self) {
-        self.load_from_u32(self.to_u32() % rhs.to_u32());
+        self.load_from_i32(self.to_i32() % rhs.to_i32());
     }
 }

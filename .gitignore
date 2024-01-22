@@ -1,7 +1,2 @@
 .DS_Store
-foo.txt
-sine.wav
-sine8.wav
-sine16.wav
-sine24.wav
-sine32.wav
+output/

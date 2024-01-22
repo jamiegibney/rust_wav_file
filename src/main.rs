@@ -3,43 +3,51 @@ use std::{f32::consts::TAU, io::Result};
 
 /// Module for a wave file header.
 mod header;
+/// Module for a signed 24-bit integer type.
+mod signed_24_bit_int;
 /// Module for audio sample types.
 mod to_sample_range;
-/// Module for a unsigned 24-bit integer type.
-mod unsigned_24_bit_int;
+
 use header::WavHeader;
+use signed_24_bit_int::i24;
 use to_sample_range::ToSampleRange;
-use unsigned_24_bit_int::u24;
 
 // The sample rate of the sine wave and output wav file.
 const SAMPLE_RATE: f32 = 44100.0;
+const DURATION_SECS: f32 = 0.1;
+const OUTPUT_PATH: &str = "output/";
 
 fn main() -> Result<()> {
     let sine_8_bit = create_wav::<u8>();
-    std::fs::write("sine8.wav", sine_8_bit)?;
+    std::fs::write(file_with_path("sine8.wav"), sine_8_bit)?;
 
     // not working
-    let sine_16_bit = create_wav::<u16>();
-    std::fs::write("sine16.wav", sine_16_bit)?;
+    let sine_16_bit = create_wav::<i16>();
+    std::fs::write(file_with_path("sine16.wav"), sine_16_bit)?;
 
     // not working
-    let sine_24_bit = create_wav::<u24>();
-    std::fs::write("sine24.wav", sine_24_bit)?;
+    let sine_24_bit = create_wav::<i24>();
+    std::fs::write(file_with_path("sine24.wav"), sine_24_bit)?;
 
     // not working
-    let sine_32_bit = create_wav::<f32>();
-    std::fs::write("sine32.wav", sine_32_bit)?;
+    let sine_32_bit = create_wav::<i32>();
+    std::fs::write(file_with_path("sine32.wav"), sine_32_bit)?;
 
     Ok(())
 }
 
+fn file_with_path(file_name: &str) -> String {
+    format!("{OUTPUT_PATH}{file_name}")
+}
+
 fn create_wav<T: ToSampleRange>() -> Vec<u8> {
     // our sine wave
-    let sine_data = make_sine::<T>(2.0, 440.0, 0.25, SAMPLE_RATE);
+    let sine_data = make_sine::<T>(DURATION_SECS, 440.0, 0.25, SAMPLE_RATE);
     let sine_bytes = unsafe { slice_to_bytes(&sine_data) };
 
     // our wave file header
-    let mut header = WavHeader::new(SAMPLE_RATE, 8, 1);
+    let mut header =
+        WavHeader::new(SAMPLE_RATE, std::mem::size_of::<T>() as u16 * 8, 1);
     header.set_data_size(sine_bytes.len() as u32);
     let header_bytes = unsafe { header.as_bytes() };
 
