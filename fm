@@ -41,30 +41,22 @@ struct WavHeader {
 
 impl WavHeader {
     /// Creates a new, initialized wav file header.
-    pub fn new(sample_rate: f32, bit_depth: u16, num_channels: u16) -> Self {
+    pub fn new(sample_rate: f32, bit_depth: u32, num_channels: u16) -> Self {
         Self {
             riff: *b"RIFF",
             file_size: 0,
             file_type: *b"WAVE",
             format_marker: *b"fmt ",
             format_data_len: 16,
-            format_type: 1,
-            num_channels,
-            sample_rate: sample_rate as u32,
-            bit_rate: (sample_rate as u32
-                * bit_depth as u32
-                * num_channels as u32)
-                / 8,
-            bits_for_all_channels: (bit_depth * num_channels) / 8,
-            bits_per_sample: bit_depth,
-            data_header: *b"data",
-            data_size: 0,
+            format_type: todo!(),
+            num_channels: todo!(),
+            sample_rate: todo!(),
+            bit_rate: todo!(),
+            bits_for_all_channels: todo!(),
+            bits_per_sample: todo!(),
+            data_header: todo!(),
+            data_size: todo!(),
         }
-    }
-
-    pub fn set_data_size(&mut self, size_bytes: u32) {
-        self.file_size = std::mem::size_of::<Self>() as u32 + size_bytes;
-        self.data_size = size_bytes;
     }
 
     /// Returns `self` as a slice of bytes.
@@ -84,8 +76,7 @@ fn main() -> Result<()> {
     let sine_bytes = slice_to_bytes(&sine_data);
 
     // our wave file header
-    let mut header = WavHeader::new(SAMPLE_RATE, 8, 1);
-    header.set_data_size(sine_bytes.len() as u32);
+    let header = WavHeader::new();
     let header_bytes = unsafe { header.as_bytes() };
 
     // the file data
