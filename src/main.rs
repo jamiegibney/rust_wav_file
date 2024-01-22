@@ -5,6 +5,9 @@ use std::{
     ops::RangeInclusive,
 };
 
+mod unsigned_24_bit_int;
+use unsigned_24_bit_int::u24;
+
 // The sample rate of the sine wave and output wav file.
 const SAMPLE_RATE: f32 = 44100.0;
 
@@ -29,34 +32,21 @@ impl WavHeader {
     }
 }
 
-/// Creates a vector of samples representing an 8-bit sine wave of duration
-/// `duration_secs` seconds and at frequency `freq` Hz.
-fn make_sine_u8(duration_secs: f32, freq: f32, sample_rate: f32) -> Vec<u8> {
-    let num_samples = (sample_rate * duration_secs) as usize;
-
-    (0..num_samples)
-        .map(|i| {
-            let phase = i as f32 * freq / sample_rate;
-            let sine = (TAU * phase).sin();
-
-            (255.0 * (sine * 0.5 + 0.5)) as u8
-        })
-        .collect()
-}
-
 fn main() -> Result<()> {
     // our sine wave
-    let mut sine_data = make_sine_u8(2.0, 440.0, SAMPLE_RATE);
+    let sine_data = make_sine::<u8>(2.0, 440.0, SAMPLE_RATE);
+    let sine_bytes = slice_to_bytes(&sine_data);
+
     // our wave file header
     let header = WavHeader::new();
     let header_bytes = unsafe { header.as_bytes() };
 
     // the file data
     let mut file_data = Vec::from(header_bytes);
-    file_data.append(&mut sine_data);
+    file_data.extend_from_slice(sine_bytes);
 
     // write the file
-    std::fs::write("foo.txt", file_data)?;
+    std::fs::write("sine.wav", file_data)?;
 
     Ok(())
 }
@@ -79,8 +69,42 @@ impl ToSampleRange for u16 {
     }
 }
 
+impl ToSampleRange for u24 {
+    fn sine_to_range(sine_output: f32) -> Self {
+        Self::new((Self::MAX as f32 * (sine_output * 0.5 + 0.5)) as u32)
+    }
+}
+
 impl ToSampleRange for u32 {
     fn sine_to_range(sine_output: f32) -> Self {
         (Self::MAX as f32 * (sine_output * 0.5 + 0.5)) as Self
+    }
+}
+
+/// Creates a vector of samples representing an 8-bit sine wave of duration
+/// `duration_secs` seconds and at frequency `freq` Hz.
+fn make_sine<T: ToSampleRange>(
+    duration_secs: f32,
+    freq: f32,
+    sample_rate: f32,
+) -> Vec<T> {
+    let num_samples = (sample_rate * duration_secs) as usize;
+
+    (0..num_samples)
+        .map(|i| {
+            let phase = i as f32 * freq / sample_rate;
+            let sine = (TAU * phase).sin();
+
+            T::sine_to_range(sine)
+        })
+        .collect()
+}
+
+fn slice_to_bytes<T: Sized>(data: &[T]) -> &[u8] {
+    unsafe {
+        std::slice::from_raw_parts(
+            (data.as_ptr()).cast::<u8>(),
+            std::mem::size_of_val(data),
+        )
     }
 }
