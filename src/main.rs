@@ -6,11 +6,11 @@ mod header;
 /// Module for a signed 24-bit integer type.
 mod signed_24_bit_int;
 /// Module for audio sample types.
-mod to_sample_range;
+mod sample_types;
 
 use header::WavHeader;
 use signed_24_bit_int::i24;
-use to_sample_range::ToSampleRange;
+use sample_types::SampleType;
 
 // The sample rate of the sine wave and output wav file.
 const SAMPLE_RATE: f32 = 44100.0;
@@ -44,11 +44,13 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+/// Appends `file_name` to the [`OUTPUT_PATH`].
 fn file_with_path(file_name: &str) -> String {
     format!("{OUTPUT_PATH}{file_name}")
 }
 
-fn create_wav<T: ToSampleRange>() -> Vec<u8> {
+/// Creates the wave file with sample type `T`, and returns it as a vector of bytes.
+fn create_wav<T: SampleType>() -> Vec<u8> {
     // our sine wave
     let sine_data = make_sine::<T>(DURATION_SECS, 440.0, 0.25, SAMPLE_RATE);
     let sine_bytes = unsafe { slice_to_bytes(&sine_data) };
@@ -68,7 +70,7 @@ fn create_wav<T: ToSampleRange>() -> Vec<u8> {
 
 /// Creates a vector of samples representing an 8-bit sine wave of duration
 /// `duration_secs` seconds and at frequency `freq` Hz.
-fn make_sine<T: ToSampleRange>(
+fn make_sine<T: SampleType>(
     duration_secs: f32,
     freq: f32,
     amp: f32,

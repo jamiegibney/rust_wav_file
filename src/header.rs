@@ -54,6 +54,7 @@ impl WavHeader {
         }
     }
 
+    /// Sets the size fields of the header based on the length of the audio data block in bytes.
     pub fn set_data_size(&mut self, size_bytes: u32) {
         self.file_size = std::mem::size_of::<Self>() as u32 + size_bytes;
         self.data_size = size_bytes;
