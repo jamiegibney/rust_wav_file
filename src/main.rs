@@ -3,7 +3,9 @@ use std::{f32::consts::TAU, io::Result};
 
 /// Module for a unsigned 24-bit integer type.
 mod unsigned_24_bit_int;
+mod to_sample_range;
 use unsigned_24_bit_int::u24;
+use to_sample_range::ToSampleRange;
 
 // The sample rate of the sine wave and output wav file.
 const SAMPLE_RATE: f32 = 44100.0;
@@ -79,8 +81,20 @@ impl WavHeader {
 }
 
 fn main() -> Result<()> {
+    // let sine_8_bit = create_wav::<u8>();
+    // let sine_16_bit = create_wav::<u16>();
+    // let sine_24_bit = create_wav::<u24>();
+    let sine_32_bit = create_wav::<f32>();
+
+    // write the file
+    std::fs::write("sine.wav", sine_32_bit)?;
+
+    Ok(())
+}
+
+fn create_wav<T: ToSampleRange>() -> Vec<u8> {
     // our sine wave
-    let sine_data = make_sine::<u8>(2.0, 440.0, SAMPLE_RATE);
+    let sine_data = make_sine::<T>(2.0, 440.0, SAMPLE_RATE);
     let sine_bytes = slice_to_bytes(&sine_data);
 
     // our wave file header
@@ -92,40 +106,7 @@ fn main() -> Result<()> {
     let mut file_data = Vec::from(header_bytes);
     file_data.extend_from_slice(sine_bytes);
 
-    // write the file
-    std::fs::write("sine.wav", file_data)?;
-
-    Ok(())
-}
-
-trait ToSampleRange {
-    /// Assuming `sine_output` is in the range `[-1.0, 1.0]`, this method will
-    /// normalise the value to the current type.
-    fn sine_to_range(sine_output: f32) -> Self;
-}
-
-impl ToSampleRange for u8 {
-    fn sine_to_range(sine_output: f32) -> Self {
-        (Self::MAX as f32 * (sine_output * 0.5 + 0.5)) as Self
-    }
-}
-
-impl ToSampleRange for u16 {
-    fn sine_to_range(sine_output: f32) -> Self {
-        (Self::MAX as f32 * (sine_output * 0.5 + 0.5)) as Self
-    }
-}
-
-impl ToSampleRange for u24 {
-    fn sine_to_range(sine_output: f32) -> Self {
-        Self::new((Self::MAX as f32 * (sine_output * 0.5 + 0.5)) as u32)
-    }
-}
-
-impl ToSampleRange for u32 {
-    fn sine_to_range(sine_output: f32) -> Self {
-        (Self::MAX as f32 * (sine_output * 0.5 + 0.5)) as Self
-    }
+    file_data
 }
 
 /// Creates a vector of samples representing an 8-bit sine wave of duration
