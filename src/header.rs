@@ -1,4 +1,6 @@
 /// A representation of the wav file header.
+///
+/// Source <https://docs.fileformat.com/audio/wav/>.
 #[repr(C)]
 pub struct WavHeader {
     /// Marks the file as a RIFF file (value: `"RIFF"`).

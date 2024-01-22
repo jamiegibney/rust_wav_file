@@ -18,6 +18,14 @@ const DURATION_SECS: f32 = 3.0;
 const OUTPUT_PATH: &str = "output/";
 
 fn main() -> Result<()> {
+    if std::process::Command::new("mkdir")
+        .arg("output")
+        .spawn()
+        .is_err()
+    {
+        eprintln!("failed to create output directory");
+    }
+
     let sine_8_bit = create_wav::<u8>();
     std::fs::write(file_with_path("sine8.wav"), sine_8_bit)?;
 
