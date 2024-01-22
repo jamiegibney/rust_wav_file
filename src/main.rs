@@ -14,7 +14,7 @@ use to_sample_range::ToSampleRange;
 
 // The sample rate of the sine wave and output wav file.
 const SAMPLE_RATE: f32 = 44100.0;
-const DURATION_SECS: f32 = 0.1;
+const DURATION_SECS: f32 = 3.0;
 const OUTPUT_PATH: &str = "output/";
 
 fn main() -> Result<()> {
