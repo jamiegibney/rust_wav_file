@@ -29,15 +29,12 @@ fn main() -> Result<()> {
     let sine_8_bit = create_wav::<u8>();
     std::fs::write(file_with_path("sine8.wav"), sine_8_bit)?;
 
-    // not working
     let sine_16_bit = create_wav::<i16>();
     std::fs::write(file_with_path("sine16.wav"), sine_16_bit)?;
 
-    // not working
     let sine_24_bit = create_wav::<i24>();
     std::fs::write(file_with_path("sine24.wav"), sine_24_bit)?;
 
-    // not working
     let sine_32_bit = create_wav::<i32>();
     std::fs::write(file_with_path("sine32.wav"), sine_32_bit)?;
 
